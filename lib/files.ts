@@ -22,6 +22,11 @@ export const PURPOSE = {
     "text/plain","application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ])},
+  exam_question: { bucket: "exam-files", maxBytes: 26214400, mimes: new Set(["application/pdf"]) },
+  exam_resource: { bucket: "exam-files", maxBytes: 26214400, mimes: new Set([
+    "application/pdf","image/jpeg","image/png","image/webp",
+    "application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ])},
 } as const;
 
 export type Purpose = keyof typeof PURPOSE;

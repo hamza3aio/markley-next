@@ -3,6 +3,20 @@ import { notifyUsers } from "@/lib/email";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
+export const DEFAULT_RULES = [
+  { code: "assignment_submit", name: "Assignment submitted", points: 10 },
+  { code: "perfect_score", name: "Perfect score", points: 50 },
+  { code: "attendance", name: "Attendance", points: 5 },
+  { code: "participation", name: "Participation", points: 10 },
+];
+
+export async function seedDefaults(admin: Admin, classId: string, createdBy: string): Promise<void> {
+  await admin.from("point_rules").upsert(
+    DEFAULT_RULES.map((r) => ({ ...r, class_id: classId, created_by: createdBy })),
+    { onConflict: "class_id,code", ignoreDuplicates: true }
+  );
+}
+
 export async function classTotal(admin: Admin, classId: string, userId: string): Promise<number> {
   const { data } = await admin.from("points").select("points").eq("class_id", classId).eq("user_id", userId);
   return ((data ?? []) as { points: number }[]).reduce((n, r) => n + Number(r.points), 0);

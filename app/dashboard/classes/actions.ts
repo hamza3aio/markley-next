@@ -47,11 +47,8 @@ export async function createClassAction(_prev: string | null, form: FormData): P
   }).select("id").single();
   if (error || !cls) return "Something went wrong. Please try again.";
   await admin.from("class_members").insert({ class_id: cls.id, user_id: teacherId, role_in_class: "teacher", invited_by: viewer.id });
-  const { DEFAULT_RULES } = await import("@/lib/points");
-  await admin.from("point_rules").upsert(
-    DEFAULT_RULES.map((r) => ({ ...r, class_id: cls.id as string, created_by: viewer.id })),
-    { onConflict: "class_id,code", ignoreDuplicates: true }
-  );
+  const { seedDefaults } = await import("@/lib/points-engine");
+  await seedDefaults(admin, cls.id as string, viewer.id);
   await logActivity(admin, viewer, "class.create", "class", cls.id as string, { name });
   redirect(`/dashboard/classes/${cls.id as string}`);
 }

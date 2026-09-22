@@ -11,6 +11,7 @@ import { ContentSection, AssignmentsSection } from "./study";
 import { AttendanceSection } from "./attendance";
 import { AnalyticsSection } from "./analytics";
 import { SessionsSection, EventsSection } from "./schedule";
+import { GamificationSection } from "./gamification";
 
 export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -88,6 +89,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
       <AnalyticsSection classId={cls.id} canExport={isStaff && can(viewer, "reports.export")} />
       <SessionsSection classId={cls.id} isStaff={isStaff} sessions={(sessions ?? []) as never[]} />
       <EventsSection classId={cls.id} isStaff={isStaff} events={(events ?? []) as never[]} />
+      <GamificationSection classId={cls.id} isManager={isAdmin(viewer) || cls.teacher_id === viewer.id} isStaff={isStaff} />
     </>
   );
 }
