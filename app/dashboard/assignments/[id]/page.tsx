@@ -7,6 +7,7 @@ import { getClassAccess } from "@/lib/classes";
 import { PURPOSE, signedDownload } from "@/lib/files";
 import { SubmitForm } from "./submit-form";
 import { AttachForm, DeleteAssignmentButton } from "./manage";
+import { Gradebook } from "./gradebook";
 
 export default async function AssignmentDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -93,6 +94,7 @@ export default async function AssignmentDetail({ params }: { params: Promise<{ i
         {manager ? <AttachForm assignmentId={id} classId={asg.class_id as string} /> : null}
       </section>
       {staff ? (
+        <>
         <section className="card">
           <h3 style={{ marginTop: 0 }}>Submissions ({submissionCount})</h3>
           {submissions.length ? (
@@ -111,8 +113,20 @@ export default async function AssignmentDetail({ params }: { params: Promise<{ i
               </tbody>
             </table></div>
           ) : <div className="empty">No submissions yet.</div>}
-          <p style={{ color: "var(--muted)", fontSize: 13 }}>Grading arrives with the next migration batch.</p>
         </section>
+        <section className="card">
+          <h3 style={{ marginTop: 0 }}>Gradebook</h3>
+          <Gradebook
+            assignmentId={id}
+            maxPoints={asg.max_points as number}
+            students={submissions.map((s) => ({
+              student_id: s.student_id as string,
+              studentName: ((((s.student ?? {}) as { full_name?: string }).full_name) || ((s.student ?? {}) as { email?: string }).email || '---') as string,
+              status: s.status as string,
+            }))}
+          />
+        </section>
+        </>
       ) : member?.role_in_class === "student" ? (
         <SubmitForm
           assignmentId={id}

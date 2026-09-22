@@ -8,6 +8,8 @@ import { listAssignments } from "@/lib/assignments";
 import { listContentFiles } from "./content-actions";
 import { InviteForm, EditClassForm, DeleteClassButton } from "./forms";
 import { ContentSection, AssignmentsSection } from "./study";
+import { AttendanceSection } from "./attendance";
+import { AnalyticsSection } from "./analytics";
 
 export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -72,6 +74,15 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
         submittedIds={asgData?.submittedIds ?? []}
         canCreate={isStaff && can(viewer, "assignment.create")}
       />
+      <AttendanceSection
+        classId={cls.id}
+        isStaff={isStaff}
+        students={members.filter((m) => m.role_in_class === "student").map((m) => ({
+          user_id: m.user_id as string,
+          name: ((m.profile as { full_name?: string; email?: string } | null)?.full_name || (m.profile as { email?: string } | null)?.email || "—") as string,
+        }))}
+      />
+      <AnalyticsSection classId={cls.id} canExport={isStaff && can(viewer, "reports.export")} />
     </>
   );
 }
