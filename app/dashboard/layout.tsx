@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireViewer } from "@/lib/auth";
 import { signOutAction } from "@/app/login/actions";
+import { NotificationsBell } from "./notifications-bell";
 
 const TABS = [
   { id: "overview", label: "Dashboard", href: "/dashboard", roles: ["admin", "teacher", "assistant", "student", "parent"] },
@@ -27,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="topbar-inner">
           <Link className="brand" href="/dashboard"><span className="brand-mark">M</span> Markley</Link>
           <div className="spacer" />
+          <NotificationsBell />
           <span className="badge">{viewer.profile.full_name || viewer.profile.email} · {viewer.profile.role}</span>
           <form action={signOutAction}>
             <button className="btn ghost" type="submit">Sign out</button>

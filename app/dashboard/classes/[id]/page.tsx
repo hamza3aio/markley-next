@@ -10,6 +10,7 @@ import { InviteForm, EditClassForm, DeleteClassButton } from "./forms";
 import { ContentSection, AssignmentsSection } from "./study";
 import { AttendanceSection } from "./attendance";
 import { AnalyticsSection } from "./analytics";
+import { SessionsSection, EventsSection } from "./schedule";
 
 export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -31,6 +32,8 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
   const files = await listContentFiles(id, member?.role_in_class ?? (isAdmin(viewer) ? "admin" : null), myRole === "parent");
   const asgData = await listAssignments(admin, viewer, id);
   const isStaff = ["admin", "teacher", "assistant"].includes(myRole);
+  const { data: sessions } = await admin.from("sessions").select("id,title,description,start_at,end_at,meeting_url,provider").eq("class_id", id).is("deleted_at", null).order("start_at", { ascending: true }).limit(200);
+  const { data: events } = await admin.from("calendar_events").select("id,title,type,start_at,link").eq("class_id", id).order("start_at", { ascending: true }).limit(200);
 
   return (
     <>
@@ -83,6 +86,8 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
         }))}
       />
       <AnalyticsSection classId={cls.id} canExport={isStaff && can(viewer, "reports.export")} />
+      <SessionsSection classId={cls.id} isStaff={isStaff} sessions={(sessions ?? []) as never[]} />
+      <EventsSection classId={cls.id} isStaff={isStaff} events={(events ?? []) as never[]} />
     </>
   );
 }
