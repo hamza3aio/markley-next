@@ -15,6 +15,8 @@ function friendly(message: string): string {
 export async function signInAction(_prev: string | null, form: FormData): Promise<string | null> {
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
+  const next = String(form.get("next") ?? "/dashboard");
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
   if (!email || !password) return "Email and password are required.";
 
   const supabase = await createClient();
@@ -42,7 +44,7 @@ export async function signInAction(_prev: string | null, form: FormData): Promis
     action: "login",
     metadata: {},
   });
-  redirect("/dashboard");
+  redirect(safeNext);
 }
 
 export async function signOutAction() {
