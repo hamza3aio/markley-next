@@ -4,7 +4,10 @@ import { requireViewer } from "@/lib/auth";
 import { can, isAdmin } from "@/lib/perms";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getClassAccess, getMembers } from "@/lib/classes";
+import { listAssignments } from "@/lib/assignments";
+import { listContentFiles } from "./content-actions";
 import { InviteForm, EditClassForm, DeleteClassButton } from "./forms";
+import { ContentSection, AssignmentsSection } from "./study";
 
 export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,6 +22,13 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
   const inviter =
     isAdmin(viewer) || owner || (member?.role_in_class === "assistant" && can(viewer, "class.invite"));
   const members = await getMembers(admin, id);
+  const canUpload =
+    isAdmin(viewer) || owner ||
+    (member?.role_in_class === "assistant" && can(viewer, "content.upload")) ||
+    (member?.role_in_class === "teacher" && can(viewer, "content.upload"));
+  const files = await listContentFiles(id, member?.role_in_class ?? (isAdmin(viewer) ? "admin" : null), myRole === "parent");
+  const asgData = await listAssignments(admin, viewer, id);
+  const isStaff = ["admin", "teacher", "assistant"].includes(myRole);
 
   return (
     <>
@@ -55,6 +65,13 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
         </div>
       </section>
       {inviter ? <InviteForm classId={cls.id} /> : null}
+      <ContentSection classId={cls.id} files={files} canUpload={canUpload} />
+      <AssignmentsSection
+        classId={cls.id}
+        assignments={asgData?.assignments ?? []}
+        submittedIds={asgData?.submittedIds ?? []}
+        canCreate={isStaff && can(viewer, "assignment.create")}
+      />
     </>
   );
 }
