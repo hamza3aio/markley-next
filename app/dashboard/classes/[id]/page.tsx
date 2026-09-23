@@ -12,6 +12,7 @@ import { AttendanceSection } from "./attendance";
 import { AnalyticsSection } from "./analytics";
 import { SessionsSection, EventsSection } from "./schedule";
 import { GamificationSection } from "./gamification";
+import { AIAssignmentDraft } from "./ai-draft";
 
 export default async function ClassDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -90,6 +91,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
       <SessionsSection classId={cls.id} isStaff={isStaff} sessions={(sessions ?? []) as never[]} />
       <EventsSection classId={cls.id} isStaff={isStaff} events={(events ?? []) as never[]} />
       <GamificationSection classId={cls.id} isManager={isAdmin(viewer) || cls.teacher_id === viewer.id} isStaff={isStaff} />
+      {isStaff && can(viewer, "assignment.create") ? <AIAssignmentDraft classId={cls.id} classSubject={cls.subject} /> : null}
     </>
   );
 }
